@@ -12,6 +12,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
 {
@@ -22,7 +23,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        return UserResource::collection(User::all());
+        $perPage = $request->get('per_page', 10);
+
+        $users = User::doPagination($perPage);
+
+        return UserResource::collection($users);
     }
 
     /**

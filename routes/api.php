@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
@@ -44,5 +45,10 @@ Route::group(["middleware" => "auth:sanctum"], function () {
         Route::get('/{role}', [RoleController::class, 'show']);
         Route::patch('/{role}', [RoleController::class, 'update']);
         Route::delete('/{role}', [RoleController::class, 'destroy']);
+    });
+
+
+    Route::group(["prefix" => 'activity'], function () {
+        Route::get('/', [ActivityController::class, 'index']);
     });
 });
