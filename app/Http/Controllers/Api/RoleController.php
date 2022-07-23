@@ -10,9 +10,11 @@ use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use App\Http\Resources\DetailRoleResource;
 use App\Http\Resources\RoleResource;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class RoleController extends Controller
 {
@@ -21,9 +23,22 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return RoleResource::collection(Role::all());
+        $perPage = $request->get('per_page', 10);
+
+        $roles = $this->doPagination($perPage);
+
+        return RoleResource::collection($roles);
+    }
+
+    public function doPagination($perPage = 10): LengthAwarePaginator
+    {
+        $users = QueryBuilder::for(Role::class)
+            ->allowedFilters(['name'])
+            ->allowedSorts(['name']);
+
+        return $users->paginate($perPage);
     }
 
     /**
