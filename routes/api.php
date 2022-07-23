@@ -37,4 +37,12 @@ Route::group(["middleware" => "auth:sanctum"], function () {
         Route::delete('/{user}', [UserController::class, 'destroy'])->middleware("permission:remove user");
         Route::patch('/{user}', [UserController::class, 'update'])->middleware("permission:update user");
     });
+
+    Route::group(['prefix' => 'roles', 'middleware' => 'role_or_permission:admin|update user|create user'], function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::get('/{role}', [RoleController::class, 'show']);
+        Route::patch('/{role}', [RoleController::class, 'update']);
+        Route::delete('/{role}', [RoleController::class, 'destroy']);
+    });
 });

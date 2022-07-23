@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\Role\DestroyRoleEvent;
+use App\Events\Role\StoreRoleEvent;
+use App\Events\Role\UpdateRoleEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Resources\DetailRoleResource;
 use App\Http\Resources\RoleResource;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
@@ -41,6 +45,8 @@ class RoleController extends Controller
             }
 
             DB::commit();
+
+            event(new StoreRoleEvent($role));
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }
@@ -51,34 +57,42 @@ class RoleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \Spatie\Permission\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
     public function show(Role $role)
     {
-        //
+        return new DetailRoleResource($role);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateRoleRequest  $request
-     * @param  \App\Models\Role  $role
+     * @param  \Spatie\Permission\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        //
+        $role->syncPermissions($request->get('permissions'));
+
+        event(new UpdateRoleEvent($role));
+
+        return new DetailRoleResource($role);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \Spatie\Permission\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
     public function destroy(Role $role)
     {
-        //
+        event(new DestroyRoleEvent($role));
+
+        $role->delete();
+
+        return response()->json(['message' => 'Role deleted successfully.']);
     }
 }
